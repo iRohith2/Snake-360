@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://grid_shader.tres" type="Shader" id=1]
+[ext_resource path="res://Camera.gd" type="Script" id=2]
+[ext_resource path="res://Player.gd" type="Script" id=3]
+[ext_resource path="res://Head.gd" type="Script" id=4]
+
+[sub_resource type="ShaderMaterial" id=1]
+shader = ExtResource( 1 )
+shader_param/thickness = 0.02
+shader_param/lineColor = Color( 0.25098, 0.25098, 0.25098, 1 )
+shader_param/backColor = Color( 0.301961, 0.301961, 0.301961, 0.196078 )
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12.5673 )
+script = ExtResource( 2 )
+wiggle_amount = 0.1
+z_offset = 5.0
+
+[node name="BigBox" type="CSGBox" parent="."]
+width = 10.0
+height = 10.0
+depth = 10.0
+material = SubResource( 1 )
+
+[node name="Player" type="Spatial" parent="."]
+script = ExtResource( 3 )
+speed = 2.0
+steerSpeed = 90.0
+
+[node name="Head" type="CSGBox" parent="Player"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5 )
+width = 0.3
+height = 0.3
+depth = 0.3
+script = ExtResource( 4 )
+
+[node name="Eye0" type="CSGBox" parent="Player/Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.08, 0.14989 )
+width = 0.05
+height = 0.05
+depth = 0.05
+material = SubResource( 2 )
+
+[node name="Eye1" type="CSGBox" parent="Player/Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 0.08, 0.15 )
+width = 0.05
+height = 0.05
+depth = 0.05
+material = SubResource( 2 )
