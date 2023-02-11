@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://grid_shader.tres" type="Shader" id=1]
 [ext_resource path="res://Camera.gd" type="Script" id=2]
@@ -13,6 +13,10 @@ shader_param/backColor = Color( 0.301961, 0.301961, 0.301961, 0.196078 )
 
 [sub_resource type="SpatialMaterial" id=2]
 albedo_color = Color( 0.137255, 0.137255, 0.137255, 1 )
+
+[sub_resource type="PrismMesh" id=3]
+
+[sub_resource type="SpatialMaterial" id=4]
 
 [node name="Spatial" type="Spatial"]
 
@@ -31,7 +35,6 @@ material = SubResource( 1 )
 [node name="Player" type="Spatial" parent="."]
 script = ExtResource( 3 )
 speed = 2.0
-steerSpeed = 90.0
 
 [node name="Head" type="CSGBox" parent="Player"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5 )
@@ -53,3 +56,17 @@ width = 0.05
 height = 0.05
 depth = 0.05
 material = SubResource( 2 )
+
+[node name="Body" type="CSGBox" parent="Player"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.325, 5 )
+width = 0.3
+height = 0.3
+depth = 0.3
+
+[node name="Tail" type="Spatial" parent="Player"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.65, 5 )
+
+[node name="Tail0" type="CSGMesh" parent="Player/Tail"]
+transform = Transform( -0.15, 2.26494e-08, 0, -2.26494e-08, -0.15, 0, 0, 0, 0.15, 0, 0, 0 )
+mesh = SubResource( 3 )
+material = SubResource( 4 )
