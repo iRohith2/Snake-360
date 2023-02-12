@@ -1,6 +1,6 @@
 extends Spatial
 
-export var speed := 1.0
+export var speed := 2.0
 export var steerSpeed := 180.0
 
 onready var head := $Head

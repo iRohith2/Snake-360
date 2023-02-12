@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://grid_shader.tres" type="Shader" id=1]
 [ext_resource path="res://Camera.gd" type="Script" id=2]
@@ -11,12 +11,17 @@ shader_param/thickness = 0.02
 shader_param/lineColor = Color( 0.25098, 0.25098, 0.25098, 1 )
 shader_param/backColor = Color( 0.301961, 0.301961, 0.301961, 0.196078 )
 
+[sub_resource type="SphereShape" id=7]
+radius = 0.2
+
 [sub_resource type="SpatialMaterial" id=2]
 albedo_color = Color( 0.137255, 0.137255, 0.137255, 1 )
 
-[sub_resource type="PrismMesh" id=3]
+[sub_resource type="SphereShape" id=8]
+radius = 0.2
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SphereShape" id=6]
+radius = 0.15
 
 [node name="Spatial" type="Spatial"]
 
@@ -34,39 +39,54 @@ material = SubResource( 1 )
 
 [node name="Player" type="Spatial" parent="."]
 script = ExtResource( 3 )
-speed = 2.0
+steerSpeed = 360.0
 
-[node name="Head" type="CSGBox" parent="Player"]
+[node name="Head" type="KinematicBody" parent="Player"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5 )
-width = 0.3
-height = 0.3
-depth = 0.3
 script = ExtResource( 4 )
 
-[node name="Eye0" type="CSGBox" parent="Player/Head"]
+[node name="CollisionShape" type="CollisionShape" parent="Player/Head"]
+shape = SubResource( 7 )
+
+[node name="Head" type="CSGSphere" parent="Player/Head"]
+radius = 0.2
+
+[node name="Eye0" type="CSGBox" parent="Player/Head/Head"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.05, 0.08, 0.14989 )
 width = 0.05
 height = 0.05
 depth = 0.05
 material = SubResource( 2 )
 
-[node name="Eye1" type="CSGBox" parent="Player/Head"]
+[node name="Eye1" type="CSGBox" parent="Player/Head/Head"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.05, 0.08, 0.15 )
 width = 0.05
 height = 0.05
 depth = 0.05
 material = SubResource( 2 )
 
-[node name="Body" type="CSGBox" parent="Player"]
+[node name="Body0" type="CSGSphere" parent="Player"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.325, 5 )
-width = 0.3
-height = 0.3
-depth = 0.3
+radius = 0.2
 
-[node name="Tail" type="Spatial" parent="Player"]
+[node name="Body1" type="KinematicBody" parent="Player"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.65, 5 )
+collision_layer = 2
 
-[node name="Tail0" type="CSGMesh" parent="Player/Tail"]
-transform = Transform( -0.15, 2.26494e-08, 0, -2.26494e-08, -0.15, 0, 0, 0, 0.15, 0, 0, 0 )
-mesh = SubResource( 3 )
-material = SubResource( 4 )
+[node name="CollisionShape" type="CollisionShape" parent="Player/Body1"]
+shape = SubResource( 8 )
+
+[node name="CSGSphere" type="CSGSphere" parent="Player/Body1"]
+radius = 0.2
+
+[node name="Apple" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -2, 5 )
+collision_layer = 4
+
+[node name="CollisionShape" type="CollisionShape" parent="Apple"]
+shape = SubResource( 6 )
+
+[node name="Apple0" type="CSGSphere" parent="Apple"]
+layers = 4
+collision_layer = 4
+radius = 0.15
