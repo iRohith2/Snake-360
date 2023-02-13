@@ -14,3 +14,7 @@ config/name="Snake-360"
 run/main_scene="res://main_game.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[rendering]
+
+textures/vram_compression/import_etc2_astc=true

@@ -1,7 +1,9 @@
 extends CharacterBody3D
 
 @export var speed := 2.0
-@export var steerSpeed := 180.0
+@export var max_speed := 10.0
+@export var steer_speed := 180.0
+@export var max_steer_speed := 360.0
 @export var extents := 5.0
 
 var up_vec := Vector3.UP
@@ -9,6 +11,7 @@ var right_vec := Vector3.RIGHT
 
 var position_history := []
 @onready var root := get_node("/root/MainGame")
+@onready var apple_spawner := root.get_node("AppleSpawner")
 @onready var body_base := root.get_node("Body1")
 @onready var body_parts := [root.get_node("Body0"), body_base]
 
@@ -45,21 +48,17 @@ func grow():
 	root.add_child(dup, true)
 	body_parts.append(dup)
 
-var itr := 0
+func _ready():
+	apple_spawner.spawn()
+	apple_spawner.spawn()
+
 func _process(delta):
-	if Time.get_ticks_msec()/1000 % 5 == 0:
-		if itr == 0:
-			grow()
-			itr += 1
-	else:
-		itr = 0
-		
 	translate_object_local(Vector3.UP * (speed * delta))
 	
 	if Input.is_action_pressed("ui_right"):
-		rotate_object_local(Vector3.FORWARD,  deg_to_rad(steerSpeed) * delta)
+		rotate_object_local(Vector3.FORWARD,  deg_to_rad(steer_speed) * delta)
 	elif Input.is_action_pressed("ui_left"):
-		rotate_object_local(Vector3.FORWARD, -deg_to_rad(steerSpeed) * delta)
+		rotate_object_local(Vector3.FORWARD, -deg_to_rad(steer_speed) * delta)
 		
 	var pos = project(transform.origin)
 	
@@ -91,10 +90,16 @@ var collision := KinematicCollision3D.new()
 func _physics_process(delta):
 	if Time.get_ticks_msec() < 1000:
 		return
-		
-	test_move(transform, (transform.basis.y) * (speed * delta), collision)
 	
-	if collision.get_collision_count() > 0:
-		var name : String = collision.get_collider().name
+	if test_move(transform, (transform.basis.y) * (speed * delta), collision):
+		var node := collision.get_collider() as Node
+		var name : String = node.name
 		if name.begins_with("Apple"):
-			print(name.substr(0, 5))
+			node.queue_free()
+			apple_spawner.curr_num_apples -= 1
+			if speed < max_speed:
+				speed += 0.1
+			if steer_speed < max_steer_speed:
+				steer_speed += 5
+			apple_spawner.spawn()
+			grow()

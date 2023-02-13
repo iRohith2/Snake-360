@@ -4,6 +4,12 @@
 [ext_resource type="Script" path="res://Player.gd" id="3_2m4pk"]
 [ext_resource type="Script" path="res://AppleSpawner.gd" id="3_qn3bx"]
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_eefm0"]
+radius = 0.22
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73yav"]
+albedo_color = Color(0.8, 0, 0, 1)
+
 [sub_resource type="Environment" id="Environment_0gpl0"]
 background_mode = 1
 
@@ -24,13 +30,20 @@ albedo_color = Color(0, 0, 0, 1)
 [sub_resource type="SphereShape3D" id="SphereShape3D_o6n84"]
 radius = 0.26
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_eefm0"]
-radius = 0.22
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73yav"]
-albedo_color = Color(0.8, 0, 0, 1)
-
 [node name="MainGame" type="Node"]
+
+[node name="AppleSpawner" type="Node" parent="."]
+script = ExtResource("3_qn3bx")
+
+[node name="Apple" type="StaticBody3D" parent="AppleSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 50)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AppleSpawner/Apple"]
+shape = SubResource("SphereShape3D_eefm0")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="AppleSpawner/Apple"]
+radius = 0.22
+material = SubResource("StandardMaterial3D_73yav")
 
 [node name="Camera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
@@ -40,13 +53,14 @@ wiggle_amount = 0.2
 z_offset = 7.0
 
 [node name="Box" type="CSGBox3D" parent="."]
+visible = false
 size = Vector3(10, 10, 10)
 material = SubResource("StandardMaterial3D_yv57c")
 
 [node name="Head" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
 script = ExtResource("3_2m4pk")
-steerSpeed = 360.0
+max_speed = 6.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Head"]
 shape = SubResource("SphereShape3D_ufwrb")
@@ -81,16 +95,3 @@ radius = 0.26
 material = SubResource("StandardMaterial3D_j7gu4")
 
 [node name="DirectionalLight" type="DirectionalLight3D" parent="."]
-
-[node name="AppleSpawner" type="Node" parent="."]
-script = ExtResource("3_qn3bx")
-
-[node name="Apple" type="StaticBody3D" parent="AppleSpawner"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 50)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="AppleSpawner/Apple"]
-shape = SubResource("SphereShape3D_eefm0")
-
-[node name="CSGSphere3D" type="CSGSphere3D" parent="AppleSpawner/Apple"]
-radius = 0.22
-material = SubResource("StandardMaterial3D_73yav")
