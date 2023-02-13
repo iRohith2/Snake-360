@@ -1,12 +1,9 @@
-[gd_resource type="Shader" format=2]
-
-[resource]
-code = "shader_type spatial;
+shader_type spatial;
 render_mode cull_disabled;
 
 uniform float thickness = 0.01;
-uniform vec4 lineColor : hint_color = vec4(0, 0, 0, 1);
-uniform vec4 backColor : hint_color = vec4(1, 1, 1, 1);
+uniform vec4 lineColor : source_color = vec4(0, 0, 0, 1);
+uniform vec4 backColor : source_color = vec4(1, 1, 1, 1);
 
 void fragment() {
     vec2 grid = fract(vec2(UV.x * 1.0, UV.y * 1.0));
@@ -15,4 +12,4 @@ void fragment() {
 	float v = float(v1 * v2 < 1.0);
     ALBEDO = v * lineColor.rgb + (1.0-v)*backColor.rgb;
 	ALPHA  = v * lineColor.a   + (1.0-v)*backColor.a - 0.001;
-}"
+}
