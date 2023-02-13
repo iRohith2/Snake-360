@@ -1,27 +1,22 @@
-[gd_scene load_steps=11 format=3 uid="uid://d4bla2q6w0n3u"]
+[gd_scene load_steps=12 format=3 uid="uid://d4bla2q6w0n3u"]
 
 [ext_resource type="Script" path="res://Camera.gd" id="1_7dyke"]
-[ext_resource type="Shader" path="res://big_box.gdshader" id="1_lfhw6"]
 [ext_resource type="Script" path="res://Player.gd" id="3_2m4pk"]
+[ext_resource type="Script" path="res://AppleSpawner.gd" id="3_qn3bx"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4ekr2"]
-
-[sub_resource type="Sky" id="Sky_ejtvp"]
-sky_material = SubResource("ProceduralSkyMaterial_4ekr2")
-
-[sub_resource type="Environment" id="Environment_8j4vt"]
+[sub_resource type="Environment" id="Environment_0gpl0"]
 background_mode = 1
-sky = SubResource("Sky_ejtvp")
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_t7wuo"]
-render_priority = 0
-shader = ExtResource("1_lfhw6")
-shader_parameter/thickness = 0.01
-shader_parameter/lineColor = Color(0.235294, 0.235294, 0.235294, 1)
-shader_parameter/backColor = Color(0.313726, 0.313726, 0.313726, 0.196078)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yv57c"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(0.254902, 0.254902, 0.254902, 0.392157)
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_ufwrb"]
 radius = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j7gu4"]
+albedo_color = Color(0.494118, 0.329412, 1, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_irmc2"]
 albedo_color = Color(0, 0, 0, 1)
@@ -29,30 +24,36 @@ albedo_color = Color(0, 0, 0, 1)
 [sub_resource type="SphereShape3D" id="SphereShape3D_o6n84"]
 radius = 0.26
 
+[sub_resource type="SphereShape3D" id="SphereShape3D_eefm0"]
+radius = 0.22
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73yav"]
+albedo_color = Color(0.8, 0, 0, 1)
+
 [node name="MainGame" type="Node"]
 
 [node name="Camera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
-environment = SubResource("Environment_8j4vt")
+environment = SubResource("Environment_0gpl0")
 script = ExtResource("1_7dyke")
-z_offset = 12.0
+wiggle_amount = 0.2
+z_offset = 7.0
 
-[node name="BigBox" type="CSGBox3D" parent="."]
+[node name="Box" type="CSGBox3D" parent="."]
 size = Vector3(10, 10, 10)
-material = SubResource("ShaderMaterial_t7wuo")
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 0, 5)
+material = SubResource("StandardMaterial3D_yv57c")
 
 [node name="Head" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
 script = ExtResource("3_2m4pk")
+steerSpeed = 360.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Head"]
 shape = SubResource("SphereShape3D_ufwrb")
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="Head"]
 radius = 0.3
+material = SubResource("StandardMaterial3D_j7gu4")
 
 [node name="Eye0" type="CSGSphere3D" parent="Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.1, 0.25)
@@ -67,6 +68,7 @@ material = SubResource("StandardMaterial3D_irmc2")
 [node name="Body0" type="CSGSphere3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 5)
 radius = 0.26
+material = SubResource("StandardMaterial3D_j7gu4")
 
 [node name="Body1" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, 5)
@@ -76,3 +78,19 @@ shape = SubResource("SphereShape3D_o6n84")
 
 [node name="CSGSphere3D" type="CSGSphere3D" parent="Body1"]
 radius = 0.26
+material = SubResource("StandardMaterial3D_j7gu4")
+
+[node name="DirectionalLight" type="DirectionalLight3D" parent="."]
+
+[node name="AppleSpawner" type="Node" parent="."]
+script = ExtResource("3_qn3bx")
+
+[node name="Apple" type="StaticBody3D" parent="AppleSpawner"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 50)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AppleSpawner/Apple"]
+shape = SubResource("SphereShape3D_eefm0")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="AppleSpawner/Apple"]
+radius = 0.22
+material = SubResource("StandardMaterial3D_73yav")

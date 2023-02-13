@@ -54,7 +54,7 @@ func _process(delta):
 	else:
 		itr = 0
 		
-	#translate_object_local(Vector3.UP * (speed * delta))
+	translate_object_local(Vector3.UP * (speed * delta))
 	
 	if Input.is_action_pressed("ui_right"):
 		rotate_object_local(Vector3.FORWARD,  deg_to_rad(steerSpeed) * delta)
@@ -72,7 +72,7 @@ func _process(delta):
 	elif pos.y < -extents:
 		calc_next(Vector2.DOWN)
 		
-	var gap : float = 40 / speed
+	var gap : float = min(40 / speed, 20)
 		
 	position_history.insert(0, [transform.origin, transform.basis])
 	
@@ -86,8 +86,15 @@ func _process(delta):
 		part.transform.basis = pt[1]
 		i += 1
 
+var collision := KinematicCollision3D.new()
+
 func _physics_process(delta):
-	var kb = move_and_collide((transform.basis.y) * (speed * delta))
-	if kb != null && kb.get_collision_count() > 0:
-		var name : String = kb.get_collider().name
-		print(name.substr(0, 5))
+	if Time.get_ticks_msec() < 1000:
+		return
+		
+	test_move(transform, (transform.basis.y) * (speed * delta), collision)
+	
+	if collision.get_collision_count() > 0:
+		var name : String = collision.get_collider().name
+		if name.begins_with("Apple"):
+			print(name.substr(0, 5))

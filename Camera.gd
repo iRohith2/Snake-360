@@ -4,6 +4,7 @@ extends Camera3D
 @export var z_offset: = 8.5
 
 @onready var target : CharacterBody3D = get_node("/root/MainGame/Head")
+@onready var dir_light : DirectionalLight3D = get_node("/root/MainGame/DirectionalLight")
 
 var noise = FastNoiseLite.new()
 
@@ -23,3 +24,4 @@ func _process(_delta):
 	
 	var new_xform = Transform3D.IDENTITY.translated(origin).looking_at(target_xform*(Vector3.ZERO), target.up_vec)
 	self.transform = self.transform.interpolate_with(new_xform, 0.05)
+	dir_light.transform = self.transform
