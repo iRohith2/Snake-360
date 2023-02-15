@@ -53,7 +53,6 @@ wiggle_amount = 0.2
 z_offset = 7.0
 
 [node name="Box" type="CSGBox3D" parent="."]
-visible = false
 size = Vector3(10, 10, 10)
 material = SubResource("StandardMaterial3D_yv57c")
 

@@ -49,8 +49,7 @@ func grow():
 	body_parts.append(dup)
 
 func _ready():
-	apple_spawner.spawn()
-	apple_spawner.spawn()
+	apple_spawner.spawn(get_world_3d().direct_space_state)
 
 func _process(delta):
 	translate_object_local(Vector3.UP * (speed * delta))
@@ -101,5 +100,5 @@ func _physics_process(delta):
 				speed += 0.1
 			if steer_speed < max_steer_speed:
 				steer_speed += 5
-			apple_spawner.spawn()
+			apple_spawner.spawn(get_world_3d().direct_space_state)
 			grow()
