@@ -1,99 +1,121 @@
-extends CharacterBody3D
+extends Node3D
 
 @export var speed := 2.0
 @export var max_speed := 10.0
 @export var steer_speed := 180.0
 @export var max_steer_speed := 360.0
 @export var extents := 5.0
+@export var min_gap := 0.3
+@export var smooth_turns := true
 
-var up_vec := Vector3.UP
-var right_vec := Vector3.RIGHT
-
-var position_history := []
 @onready var root := get_node("/root/MainGame")
 @onready var apple_spawner := root.get_node("AppleSpawner")
-@onready var body_base := root.get_node("Body1")
-@onready var body_parts := [root.get_node("Body0"), body_base]
+@onready var head : CharacterBody3D = $Head
+@onready var body_base : CharacterBody3D = $Body
+@onready var body_parts : Array[CharacterBody3D] = [body_base]
+@onready var diameter : float = $Head/CSGSphere3D.radius*2
 
-func project(vec: Vector3) -> Vector2:
-	var axis := up_vec.cross(right_vec).round()
-	
-	match axis:
-		Vector3.UP      : transform.origin.y = -extents
-		Vector3.DOWN    : transform.origin.y =  extents
-		Vector3.RIGHT   : transform.origin.x = -extents
-		Vector3.LEFT    : transform.origin.x =  extents
-		Vector3.FORWARD : transform.origin.z =  extents
-		Vector3.BACK    : transform.origin.z = -extents
-	
-	return Vector2(right_vec.dot(vec), up_vec.dot(vec))
-
-func calc_next(dir: Vector2):
-	match dir:
-		Vector2.UP:
-			up_vec = up_vec.rotated(right_vec, -0.5*PI)
-			rotate(right_vec, -0.5*PI)
-		Vector2.DOWN:
-			up_vec = up_vec.rotated(right_vec,  0.5*PI)
-			rotate(right_vec,  0.5*PI)
-		Vector2.RIGHT:
-			right_vec = right_vec.rotated(up_vec,  0.5*PI)
-			rotate(up_vec,  0.5*PI)
-		Vector2.LEFT:
-			right_vec = right_vec.rotated(up_vec, -0.5*PI)
-			rotate(up_vec, -0.5*PI)
-
-func grow():
-	var dup : CharacterBody3D = body_base.duplicate()
-	root.add_child(dup, true)
-	body_parts.append(dup)
+var position_history := []
+var input_history := []
+var collision := KinematicCollision3D.new()
 
 func _ready():
 	apple_spawner.spawn(get_world_3d().direct_space_state)
-
+	
+var k := 0
 func _process(delta):
-	translate_object_local(Vector3.UP * (speed * delta))
-	
-	if Input.is_action_pressed("ui_right"):
-		rotate_object_local(Vector3.FORWARD,  deg_to_rad(steer_speed) * delta)
-	elif Input.is_action_pressed("ui_left"):
-		rotate_object_local(Vector3.FORWARD, -deg_to_rad(steer_speed) * delta)
+	while k < 10:
+		grow()
+		k += 1
 		
-	var pos = project(transform.origin)
+	head.translate_object_local(Vector3.UP * (speed * delta))
 	
-	if pos.x > extents:
-		calc_next(Vector2.RIGHT)
-	elif pos.x < -extents:
-		calc_next(Vector2.LEFT)
-	elif pos.y > extents:
-		calc_next(Vector2.UP)
-	elif pos.y < -extents:
-		calc_next(Vector2.DOWN)
+	if smooth_turns:
+		if Input.is_action_pressed("ui_right"):
+			head.rotate_object_local(Vector3.FORWARD,  deg_to_rad(steer_speed) * delta)
+		elif Input.is_action_pressed("ui_left"):
+			head.rotate_object_local(Vector3.FORWARD, -deg_to_rad(steer_speed) * delta)
+	else:
+		if not input_history.is_empty():
+			var t := diameter / speed
+			var b : Basis = input_history[0][0]
+			var init_time : float = input_history[0][1]
+			t = (Time.get_ticks_msec() - init_time) / (1000 * t)
+			head.transform = head.transform.interpolate_with(Transform3D(b, head.position), t)
+			if t >= 1:
+				input_history.remove_at(0)
+				head.basis = b
 		
-	var gap : float = min(40 / speed, 20)
+	for part in body_parts: remove_child(part)
 		
-	position_history.insert(0, [transform.origin, transform.basis])
-	
-	if int(body_parts.size()*gap) < position_history.size():
-		position_history.resize(int(body_parts.size()*gap))
-	
-	var i : int = 1
-	for part in body_parts:
-		var pt = position_history[min(int(i * gap), position_history.size()-1)]
-		part.transform.origin = pt[0]
-		part.transform.basis = pt[1]
-		i += 1
+	if head.position.x > extents:
+		rotate(basis.y, 0.5*PI)
+		head.position.x -= 2*extents
+	elif head.position.x < -extents:
+		rotate(basis.y, -0.5*PI)
+		head.position.x += 2*extents
+	elif head.position.y > extents:
+		rotate(basis.x, -0.5*PI)
+		head.position.y -= 2*extents
+	elif head.position.y < -extents:
+		rotate(basis.x, 0.5*PI)
+		head.position.y += 2*extents
 
-var collision := KinematicCollision3D.new()
+	for part in body_parts: add_child(part)
+
+	position_history.insert(0, [head.global_transform, delta])
+	
+	var i : int = 0
+	var t := min_gap / speed
+	
+	for part in body_parts:
+		var st := 0.0
+		
+		while st < t and i < position_history.size():
+			var p = position_history[i]
+			st += p[1]
+			i += 1
+		
+		if i >= position_history.size():
+			part.global_transform = position_history[position_history.size()-1][0]
+		else:
+			part.global_transform = position_history[i][0]
+		
+	if i < int(0.5*position_history.size()):
+		position_history.resize(i)
+		
+func _input(event):
+	if smooth_turns: return
+	
+	var b := head.transform.basis
+
+	if event.is_action_pressed("ui_up"):
+		if b.y == Vector3.UP or b.y == Vector3.DOWN: return
+		b.x = Vector3.RIGHT
+		b.y = Vector3.UP
+		input_history.append([b, Time.get_ticks_msec()])
+	elif event.is_action_pressed("ui_down"):
+		if b.y == Vector3.UP or b.y == Vector3.DOWN: return
+		b.x = Vector3.LEFT
+		b.y = Vector3.DOWN
+		input_history.append([b, Time.get_ticks_msec()])
+	elif event.is_action_pressed("ui_right"):
+		if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
+		b.x = Vector3.DOWN
+		b.y = Vector3.RIGHT
+		input_history.append([b, Time.get_ticks_msec()])
+	elif event.is_action_pressed("ui_left"):
+		if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
+		b.x = Vector3.UP
+		b.y = Vector3.LEFT
+		input_history.append([b, Time.get_ticks_msec()])
+		
+	#head.basis = b
 
 func _physics_process(delta):
-	if Time.get_ticks_msec() < 1000:
-		return
-	
-	if test_move(transform, (transform.basis.y) * (speed * delta), collision):
-		var node := collision.get_collider() as Node
-		var name : String = node.name
-		if name.begins_with("Apple"):
+	if head.test_move(head.global_transform, (head.global_transform.basis.y) * (speed * delta), collision):
+		var node := collision.get_collider() as Node3D
+		if node.name.begins_with("Apple"):
 			node.queue_free()
 			apple_spawner.curr_num_apples -= 1
 			if speed < max_speed:
@@ -102,3 +124,10 @@ func _physics_process(delta):
 				steer_speed += 5
 			apple_spawner.spawn(get_world_3d().direct_space_state)
 			grow()
+		elif node.name.begins_with("Body") and Time.get_ticks_msec() > 1000:
+			process_mode = Node.PROCESS_MODE_DISABLED
+
+func grow():
+	var dup : CharacterBody3D = body_base.duplicate()
+	add_child(dup, true)
+	body_parts.append(dup)

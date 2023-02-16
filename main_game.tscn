@@ -18,8 +18,8 @@ transparency = 1
 cull_mode = 2
 albedo_color = Color(0.254902, 0.254902, 0.254902, 0.392157)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_ufwrb"]
-radius = 0.3
+[sub_resource type="BoxShape3D" id="BoxShape3D_xhl7l"]
+size = Vector3(0.4, 0.02, 0.2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j7gu4"]
 albedo_color = Color(0.494118, 0.329412, 1, 1)
@@ -45,6 +45,8 @@ shape = SubResource("SphereShape3D_eefm0")
 radius = 0.22
 material = SubResource("StandardMaterial3D_73yav")
 
+[node name="DirectionalLight" type="DirectionalLight3D" parent="."]
+
 [node name="Camera" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 12)
 environment = SubResource("Environment_0gpl0")
@@ -56,41 +58,37 @@ z_offset = 7.0
 size = Vector3(10, 10, 10)
 material = SubResource("StandardMaterial3D_yv57c")
 
-[node name="Head" type="CharacterBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+[node name="Player" type="Node3D" parent="."]
 script = ExtResource("3_2m4pk")
-max_speed = 6.0
+smooth_turns = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Head"]
-shape = SubResource("SphereShape3D_ufwrb")
+[node name="Head" type="CharacterBody3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
 
-[node name="CSGSphere3D" type="CSGSphere3D" parent="Head"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0)
+shape = SubResource("BoxShape3D_xhl7l")
+
+[node name="CSGSphere3D" type="CSGSphere3D" parent="Player/Head"]
 radius = 0.3
 material = SubResource("StandardMaterial3D_j7gu4")
 
-[node name="Eye0" type="CSGSphere3D" parent="Head"]
+[node name="Eye0" type="CSGSphere3D" parent="Player/Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.1, 0.25)
 radius = 0.055
 material = SubResource("StandardMaterial3D_irmc2")
 
-[node name="Eye1" type="CSGSphere3D" parent="Head"]
+[node name="Eye1" type="CSGSphere3D" parent="Player/Head"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 0.1, 0.25)
 radius = 0.055
 material = SubResource("StandardMaterial3D_irmc2")
 
-[node name="Body0" type="CSGSphere3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 5)
-radius = 0.26
-material = SubResource("StandardMaterial3D_j7gu4")
-
-[node name="Body1" type="CharacterBody3D" parent="."]
+[node name="Body" type="CharacterBody3D" parent="Player"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.75, 5)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Body1"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player/Body"]
 shape = SubResource("SphereShape3D_o6n84")
 
-[node name="CSGSphere3D" type="CSGSphere3D" parent="Body1"]
+[node name="CSGSphere3D" type="CSGSphere3D" parent="Player/Body"]
 radius = 0.26
 material = SubResource("StandardMaterial3D_j7gu4")
-
-[node name="DirectionalLight" type="DirectionalLight3D" parent="."]
