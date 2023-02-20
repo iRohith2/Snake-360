@@ -1,26 +1,25 @@
-extends Node3D
+extends Spatial
 
-@export var speed := 2.0
-@export var max_speed := 10.0
-@export var steer_speed := 180.0
-@export var max_steer_speed := 360.0
-@export var extents := 5.0
-@export var min_gap := 0.3
-@export var smooth_turns := true
+export var speed := 2.0
+export var max_speed := 10.0
+export var steer_speed := 180.0
+export var max_steer_speed := 360.0
+export var extents := 5.0
+export var min_gap := 0.3
+export var smooth_turns := false
 
-@onready var root := get_node("/root/MainGame")
-@onready var apple_spawner := root.get_node("AppleSpawner")
-@onready var head : CharacterBody3D = $Head
-@onready var body_base : CharacterBody3D = $Body
-@onready var body_parts : Array[CharacterBody3D] = [body_base]
-@onready var diameter : float = $Head/CSGSphere3D.radius*2
+onready var root := get_node("/root/MainGame")
+onready var spawner := root.get_node("Spawner")
+onready var head : KinematicBody = $Head
+onready var body_base : KinematicBody = $Body
+onready var body_parts := [body_base]
+onready var diameter : float = $Head/CSGSphere.radius*2
 
 var position_history := []
 var input_history := []
-var collision := KinematicCollision3D.new()
 
 func _ready():
-	apple_spawner.spawn(get_world_3d().direct_space_state)
+	spawner.spawn(get_world().direct_space_state)
 	
 var k := 0
 func _process(delta):
@@ -32,34 +31,38 @@ func _process(delta):
 	
 	if smooth_turns:
 		if Input.is_action_pressed("ui_right"):
-			head.rotate_object_local(Vector3.FORWARD,  deg_to_rad(steer_speed) * delta)
+			head.rotate_object_local(Vector3.FORWARD,  deg2rad(steer_speed) * delta)
 		elif Input.is_action_pressed("ui_left"):
-			head.rotate_object_local(Vector3.FORWARD, -deg_to_rad(steer_speed) * delta)
+			head.rotate_object_local(Vector3.FORWARD, -deg2rad(steer_speed) * delta)
 	else:
-		if not input_history.is_empty():
+		if not input_history.empty():
 			var t := diameter / speed
 			var b : Basis = input_history[0][0]
 			var init_time : float = input_history[0][1]
 			t = (Time.get_ticks_msec() - init_time) / (1000 * t)
-			head.transform = head.transform.interpolate_with(Transform3D(b, head.position), t)
+			head.transform = head.transform.interpolate_with(Transform(b, head.transform.origin), t)
 			if t >= 1:
-				input_history.remove_at(0)
-				head.basis = b
+				input_history.remove(0)
+				head.transform.basis = b
 		
 	for part in body_parts: remove_child(part)
-		
-	if head.position.x > extents:
-		rotate(basis.y, 0.5*PI)
-		head.position.x -= 2*extents
-	elif head.position.x < -extents:
-		rotate(basis.y, -0.5*PI)
-		head.position.x += 2*extents
-	elif head.position.y > extents:
-		rotate(basis.x, -0.5*PI)
-		head.position.y -= 2*extents
-	elif head.position.y < -extents:
-		rotate(basis.x, 0.5*PI)
-		head.position.y += 2*extents
+	
+	var pos := head.transform.origin
+	
+	if pos.x > extents:
+		rotate(transform.basis.y, 0.5*PI)
+		pos.x -= 2*extents
+	elif pos.x < -extents:
+		rotate(transform.basis.y, -0.5*PI)
+		pos.x += 2*extents
+	elif pos.y > extents:
+		rotate(transform.basis.x, -0.5*PI)
+		pos.y -= 2*extents
+	elif pos.y < -extents:
+		rotate(transform.basis.x, 0.5*PI)
+		pos.y += 2*extents
+	
+	head.transform.origin = pos
 
 	for part in body_parts: add_child(part)
 
@@ -113,21 +116,23 @@ func _input(event):
 	#head.basis = b
 
 func _physics_process(delta):
-	if head.test_move(head.global_transform, (head.global_transform.basis.y) * (speed * delta), collision):
-		var node := collision.get_collider() as Node3D
-		if node.name.begins_with("Apple"):
+	var collision := head.move_and_collide((head.global_transform.basis.y) * (speed * delta), true, true, true)
+	if collision != null and collision.collider != null:
+		var node := collision.collider as Spatial
+		if node.name.begins_with("Food"):
 			node.queue_free()
-			apple_spawner.curr_num_apples -= 1
+			spawner.curr_num_apples -= 1
 			if speed < max_speed:
 				speed += 0.1
 			if steer_speed < max_steer_speed:
 				steer_speed += 5
-			apple_spawner.spawn(get_world_3d().direct_space_state)
+			spawner.spawn(get_world().direct_space_state)
 			grow()
 		elif node.name.begins_with("Body") and Time.get_ticks_msec() > 1000:
-			process_mode = Node.PROCESS_MODE_DISABLED
+			pause_mode = Node.PAUSE_MODE_STOP
+			get_tree().paused = true
 
 func grow():
-	var dup : CharacterBody3D = body_base.duplicate()
+	var dup : Spatial = body_base.duplicate()
 	add_child(dup, true)
 	body_parts.append(dup)
