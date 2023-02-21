@@ -5,28 +5,26 @@ export var max_speed := 10.0
 export var steer_speed := 180.0
 export var max_steer_speed := 360.0
 export var extents := 5.0
-export var min_gap := 0.3
+export var min_gap := 1
 export var smooth_turns := false
 
-onready var root := get_node("/root/MainGame")
-onready var spawner := root.get_node("Spawner")
-onready var head : KinematicBody = $Head
-onready var body_base : KinematicBody = $Body
-onready var body_parts := [body_base]
-onready var diameter : float = $Head/CSGSphere.radius*2
+onready var root 			:= get_node("/root/MainGame")
+onready var ui 				:= get_node("/root/MainGame/Control")
+onready var ui_play 		:= get_node("/root/MainGame/UI_play")
+onready var spawner 		:= root.get_node("Spawner")
+onready var score 			:= ui_play.get_node("Score")
+onready var score_board 	:= ui.get_node("ScoreBoard")
+onready var score1 			:= score_board.get_node("Score")
+onready var high_score 		:= score_board.get_node("HighScore")
+onready var head 			:= $Head
+onready var body_base 		:= $Body
+onready var body_parts 		:= [body_base]
+onready var diameter : float = $Body/CSGSphere.radius*2
 
 var position_history := []
-var input_history := []
+var prev_input = null
 
-func _ready():
-	spawner.spawn(get_world().direct_space_state)
-	
-var k := 0
 func _process(delta):
-	while k < 10:
-		grow()
-		k += 1
-		
 	head.translate_object_local(Vector3.UP * (speed * delta))
 	
 	if smooth_turns:
@@ -35,19 +33,19 @@ func _process(delta):
 		elif Input.is_action_pressed("ui_left"):
 			head.rotate_object_local(Vector3.FORWARD, -deg2rad(steer_speed) * delta)
 	else:
-		if not input_history.empty():
+		if prev_input != null:
 			var t := diameter / speed
-			var b : Basis = input_history[0][0]
-			var init_time : float = input_history[0][1]
+			var b : Basis = prev_input[0]
+			var init_time : float = prev_input[1]
 			t = (Time.get_ticks_msec() - init_time) / (1000 * t)
 			head.transform = head.transform.interpolate_with(Transform(b, head.transform.origin), t)
 			if t >= 1:
-				input_history.remove(0)
+				prev_input = null
 				head.transform.basis = b
 		
 	for part in body_parts: remove_child(part)
 	
-	var pos := head.transform.origin
+	var pos : Vector3 = head.transform.origin
 	
 	if pos.x > extents:
 		rotate(transform.basis.y, 0.5*PI)
@@ -65,74 +63,93 @@ func _process(delta):
 	head.transform.origin = pos
 
 	for part in body_parts: add_child(part)
-
-	position_history.insert(0, [head.global_transform, delta])
 	
-	var i : int = 0
-	var t := min_gap / speed
+	pos = head.global_translation
+	position_history.insert(0, pos)
+	
+	var i : int = 1
 	
 	for part in body_parts:
-		var st := 0.0
+		var dst := 0.0
 		
-		while st < t and i < position_history.size():
-			var p = position_history[i]
-			st += p[1]
+		while i < position_history.size() and dst < min_gap:
+			dst += pos.distance_to(position_history[i-1])
 			i += 1
 		
-		if i >= position_history.size():
-			part.global_transform = position_history[position_history.size()-1][0]
-		else:
-			part.global_transform = position_history[i][0]
+		pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
+		part.global_translation = pos
 		
 	if i < int(0.5*position_history.size()):
 		position_history.resize(i)
 		
 func _input(event):
-	if smooth_turns: return
+	if smooth_turns or ui.visible: return
 	
-	var b := head.transform.basis
+	var b : Basis = head.transform.basis
 
 	if event.is_action_pressed("ui_up"):
 		if b.y == Vector3.UP or b.y == Vector3.DOWN: return
 		b.x = Vector3.RIGHT
 		b.y = Vector3.UP
-		input_history.append([b, Time.get_ticks_msec()])
 	elif event.is_action_pressed("ui_down"):
 		if b.y == Vector3.UP or b.y == Vector3.DOWN: return
 		b.x = Vector3.LEFT
 		b.y = Vector3.DOWN
-		input_history.append([b, Time.get_ticks_msec()])
 	elif event.is_action_pressed("ui_right"):
 		if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
 		b.x = Vector3.DOWN
 		b.y = Vector3.RIGHT
-		input_history.append([b, Time.get_ticks_msec()])
 	elif event.is_action_pressed("ui_left"):
 		if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
 		b.x = Vector3.UP
 		b.y = Vector3.LEFT
-		input_history.append([b, Time.get_ticks_msec()])
 		
-	#head.basis = b
-
+	if head.transform.basis != b:
+		if prev_input != null:
+			yield(get_tree().create_timer((diameter / speed) - 0.001 * (Time.get_ticks_msec() - prev_input[1])), "timeout")
+			
+		prev_input = [b, Time.get_ticks_msec()]
+		
 func _physics_process(delta):
-	var collision := head.move_and_collide((head.global_transform.basis.y) * (speed * delta), true, true, true)
+	var collision : KinematicCollision = head.move_and_collide((head.global_transform.basis.y) * (speed * delta), true, true, true)
 	if collision != null and collision.collider != null:
 		var node := collision.collider as Spatial
 		if node.name.begins_with("Food"):
 			node.queue_free()
-			spawner.curr_num_apples -= 1
+			spawner.curr_num_food -= 1
 			if speed < max_speed:
 				speed += 0.1
 			if steer_speed < max_steer_speed:
 				steer_speed += 5
 			spawner.spawn(get_world().direct_space_state)
+			score.text = str(int(score.text)+1)
+			if int(score.text) > int(high_score.text):
+				high_score.text = score.text
+				ui.save_hs()
 			grow()
 		elif node.name.begins_with("Body") and Time.get_ticks_msec() > 1000:
-			pause_mode = Node.PAUSE_MODE_STOP
 			get_tree().paused = true
+			ui.visible = true
+			score_board.visible = true
+			score1.text = score.text
+			ui_play.visible = false
+			
 
 func grow():
 	var dup : Spatial = body_base.duplicate()
 	add_child(dup, true)
 	body_parts.append(dup)
+
+func reset():
+	for i in range(1, body_parts.size()):
+		body_parts[i].queue_free()
+	body_parts.resize(1)
+	transform = Transform.IDENTITY
+	head.transform = Transform.IDENTITY.translated(Vector3(0, 0, extents))
+	body_base.transform = Transform.IDENTITY.translated(Vector3(0, -min_gap, extents))
+	speed = 2.0
+	steer_speed = 180.0
+	score.text = "0"
+	prev_input = null
+	spawner.reset()
+	spawner.spawn(get_world().direct_space_state)

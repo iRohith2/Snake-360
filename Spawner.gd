@@ -3,18 +3,18 @@ extends Node
 export var extents := 5.0
 export var offset := 0.5
 export var max_spawns := 2
-export var max_apples := 5
+export var max_food := 5
 
-onready var apple : StaticBody = $Food
+onready var food_base : StaticBody = $Food
 
 var rng := RandomNumberGenerator.new()
-var curr_num_apples := 0
+var curr_num_food := 0
 
 var params := PhysicsShapeQueryParameters.new()
 
 func _ready():
-	params.set_shape(apple.get_node("CollisionShape").shape)
-	params.exclude = [apple.get_rid()]
+	params.set_shape(food_base.get_node("CollisionShape").shape)
+	params.exclude = [food_base.get_rid()]
 
 func get_spawn_vec(space: PhysicsDirectSpaceState) -> Vector3:
 	var axis := rng.randi_range(-3, 2)
@@ -56,14 +56,19 @@ func get_spawn_vec(space: PhysicsDirectSpaceState) -> Vector3:
 		return vec
 
 func spawn(space: PhysicsDirectSpaceState):
-	if curr_num_apples > max_apples:
+	if curr_num_food > max_food:
 		return
 	var s := rng.randi_range(1, max_spawns)
 	
 	for i in range(s):
 		var vec := get_spawn_vec(space)
-		var dup : StaticBody = apple.duplicate()
+		var dup : StaticBody = food_base.duplicate()
 		dup.transform = Transform.IDENTITY.translated(vec)
 		dup.visible = true
 		add_child(dup, true)
-		curr_num_apples += 1
+		curr_num_food += 1
+
+func reset():
+	for f in get_children():
+		if f != food_base: f.queue_free()
+	curr_num_food = 0
