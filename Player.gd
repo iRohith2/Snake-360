@@ -5,7 +5,7 @@ export var max_speed := 10.0
 export var steer_speed := 180.0
 export var max_steer_speed := 360.0
 export var extents := 5.0
-export var min_gap := 1
+export var min_gap := 0.3
 export var smooth_turns := false
 
 onready var root 			:= get_node("/root/MainGame")
@@ -23,6 +23,9 @@ onready var diameter : float = $Body/CSGSphere.radius*2
 
 var position_history := []
 var prev_input = null
+
+func _ready():
+	get_node("/root/Swipe").connect("swipe", self, "my_input")
 
 func _process(delta):
 	head.translate_object_local(Vector3.UP * (speed * delta))
@@ -73,7 +76,7 @@ func _process(delta):
 		var dst := 0.0
 		
 		while i < position_history.size() and dst < min_gap:
-			dst += pos.distance_to(position_history[i-1])
+			dst += position_history[i].distance_to(position_history[i-1])
 			i += 1
 		
 		pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
@@ -82,27 +85,28 @@ func _process(delta):
 	if i < int(0.5*position_history.size()):
 		position_history.resize(i)
 		
-func _input(event):
+func my_input(event):
 	if smooth_turns or ui.visible: return
 	
 	var b : Basis = head.transform.basis
 
-	if event.is_action_pressed("ui_up"):
-		if b.y == Vector3.UP or b.y == Vector3.DOWN: return
-		b.x = Vector3.RIGHT
-		b.y = Vector3.UP
-	elif event.is_action_pressed("ui_down"):
-		if b.y == Vector3.UP or b.y == Vector3.DOWN: return
-		b.x = Vector3.LEFT
-		b.y = Vector3.DOWN
-	elif event.is_action_pressed("ui_right"):
-		if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
-		b.x = Vector3.DOWN
-		b.y = Vector3.RIGHT
-	elif event.is_action_pressed("ui_left"):
-		if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
-		b.x = Vector3.UP
-		b.y = Vector3.LEFT
+	match event:
+		"up":
+			if b.y == Vector3.UP or b.y == Vector3.DOWN: return
+			b.x = Vector3.RIGHT
+			b.y = Vector3.UP
+		"down":
+			if b.y == Vector3.UP or b.y == Vector3.DOWN: return
+			b.x = Vector3.LEFT
+			b.y = Vector3.DOWN
+		"right":
+			if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
+			b.x = Vector3.DOWN
+			b.y = Vector3.RIGHT
+		"left":
+			if b.y == Vector3.LEFT or b.y == Vector3.RIGHT: return
+			b.x = Vector3.UP
+			b.y = Vector3.LEFT
 		
 	if head.transform.basis != b:
 		if prev_input != null:
@@ -115,7 +119,6 @@ func _physics_process(delta):
 	if collision != null and collision.collider != null:
 		var node := collision.collider as Spatial
 		if node.name.begins_with("Food"):
-			node.queue_free()
 			spawner.curr_num_food -= 1
 			if speed < max_speed:
 				speed += 0.1
@@ -127,7 +130,12 @@ func _physics_process(delta):
 				high_score.text = score.text
 				ui.save_hs()
 			grow()
+			node.get_node("CollisionShape").queue_free()
+			node.get_node("CSGSphere").queue_free()
+			node.get_node("Particles").emitting = true
+			get_tree().create_timer(1).connect("timeout", node, "queue_free")
 		elif node.name.begins_with("Body") and Time.get_ticks_msec() > 1000:
+			$Head/Particles.emitting = true
 			get_tree().paused = true
 			ui.visible = true
 			score_board.visible = true

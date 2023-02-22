@@ -13,6 +13,7 @@ var curr_num_food := 0
 var params := PhysicsShapeQueryParameters.new()
 
 func _ready():
+	rng.seed = Time.get_ticks_usec()
 	params.set_shape(food_base.get_node("CollisionShape").shape)
 	params.exclude = [food_base.get_rid()]
 
