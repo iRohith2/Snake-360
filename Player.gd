@@ -5,7 +5,7 @@ export var max_speed := 10.0
 export var steer_speed := 180.0
 export var max_steer_speed := 360.0
 export var extents := 5.0
-export var min_gap := 0.3
+export var min_gap := 0.2
 export var smooth_turns := false
 
 onready var root 			:= get_node("/root/MainGame")
@@ -71,6 +71,7 @@ func _process(delta):
 	position_history.insert(0, pos)
 	
 	var i : int = 1
+	var prev_part := head
 	
 	for part in body_parts:
 		var dst := 0.0
@@ -80,7 +81,23 @@ func _process(delta):
 			i += 1
 		
 		pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
+		var rem_dst := min_gap - pos.distance_to(prev_part.global_translation)
+		
+		while rem_dst < 0 and i > 1:
+			i -= 1
+			pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
+			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
+			
+		if (abs(rem_dst) > 0.0001) and i+1 < position_history.size():
+			var t : float = min_gap - position_history[i+1].distance_to(prev_part.global_translation)
+			t = -t / (rem_dst - t)
+			pos = pos.linear_interpolate(position_history[i+1], 1-t)
+			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
+			print(rem_dst, " ", t)
+		
 		part.global_translation = pos
+		prev_part = part
+		
 		
 	if i < int(0.5*position_history.size()):
 		position_history.resize(i)
@@ -129,15 +146,13 @@ func _physics_process(delta):
 			if int(score.text) > int(high_score.text):
 				high_score.text = score.text
 				ui.save_hs()
+			node.queue_free()
 			grow()
-			node.get_node("CollisionShape").queue_free()
-			node.get_node("CSGSphere").queue_free()
-			node.get_node("Particles").emitting = true
-			get_tree().create_timer(1).connect("timeout", node, "queue_free")
 		elif node.name.begins_with("Body") and Time.get_ticks_msec() > 1000:
 			$Head/Particles.emitting = true
 			get_tree().paused = true
 			ui.visible = true
+			ui.get_node("Label").text = "Game over"
 			score_board.visible = true
 			score1.text = score.text
 			ui_play.visible = false

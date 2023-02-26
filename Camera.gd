@@ -14,7 +14,7 @@ func _ready():
 	noise.persistence = 0.8
 	noise.octaves = 3
 
-func _process(_delta):
+func _process(delta):
 	var target_xform := target.global_transform
 	var origin := target_xform * Vector3(0.0, 0.0, z_offset)
 
@@ -23,7 +23,7 @@ func _process(_delta):
 	origin += noise_offset
 	
 	var new_xform := Transform.IDENTITY.translated(origin).looking_at(target_xform*(Vector3.ZERO), player.transform.basis.y)
-	transform = transform.interpolate_with(new_xform, 0.05)
+	transform = transform.interpolate_with(new_xform, delta * 10)
 	
 	var b := dir_light.global_transform.basis
 	b.x = player.transform.basis.x

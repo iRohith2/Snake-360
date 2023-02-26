@@ -11,14 +11,15 @@ onready var ui_play := get_node("/root/MainGame/UI_play")
 var first_run := true
 
 func _ready():
+	get_node("/root/Swipe").connect("swipe", self, "my_input")
 	var tween := create_tween()
 	tween.tween_property($TapToPlay, "modulate", Color(0, 0, 0, min_alpha), duration/2)
 	tween.chain().tween_property($TapToPlay, "modulate", Color(1, 1, 1, max_alpha), duration/2)
 	tween.set_loops()
 	load_hs()
 
-func _input(event):
-	if visible and (event.is_action_pressed("ui_up") or event.is_action_pressed("ui_down") or event.is_action_pressed("ui_right") or event.is_action_pressed("ui_left")):
+func my_input(event):
+	if visible:
 		spawner.spawn(player.get_world().direct_space_state)
 		if first_run:
 			first_run = false
