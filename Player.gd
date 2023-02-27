@@ -91,18 +91,6 @@ func _process(delta):
 			
 		rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
 		
-#		while rem_dst < 0 and i > 1:
-#			i -= 1
-#			pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
-#			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
-#
-#		if (abs(rem_dst) > 0.0001) and i+1 < position_history.size():
-#			var t : float = min_gap - position_history[i+1].distance_to(prev_part.global_translation)
-#			t = -t / (rem_dst - t)
-#			pos = pos.linear_interpolate(position_history[i+1], 1-t)
-#			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
-#			print(rem_dst, " ", t)
-		
 		part.global_translation = pos
 		prev_part = part
 		
@@ -156,7 +144,9 @@ func _physics_process(delta):
 				ui.save_hs()
 			node.queue_free()
 			grow()
-		elif node.name.begins_with("Block") or (node.name.begins_with("Body") and Time.get_ticks_msec() > 1000):
+		elif node.name.begins_with("Stone") or node.name.begins_with("Block") or (node.name.begins_with("Body") and Time.get_ticks_msec() > 1000):
+			if node.name.begins_with("Stone"):
+				node.queue_free()
 			$Head/Particles.emitting = true
 			get_tree().paused = true
 			ui.visible = true

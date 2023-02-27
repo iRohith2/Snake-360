@@ -21,6 +21,7 @@ func _ready():
 	load_hs()
 
 func my_input(event):
+	print("swipe")
 	if visible:
 		spawner.spawn(player.get_world().direct_space_state)
 		if first_run:
@@ -33,14 +34,14 @@ func my_input(event):
 		
 func load_hs():
 	var file := File.new()
-	if not file.file_exists("user://hs"): return
-	file.open("user://hs", File.READ)
+	if not file.file_exists("user://hs" + str(world.curr_world_idx)): return
+	file.open("user://hs" + str(world.curr_world_idx), File.READ)
 	$ScoreBoard/HighScore.text = str(file.get_32())
 	file.close()
 
 func save_hs():
 	var file := File.new()
-	file.open("user://hs", File.WRITE)
+	file.open("user://hs" + str(world.curr_world_idx), File.WRITE)
 	file.store_32(int($ScoreBoard/HighScore.text))
 	file.close()
 

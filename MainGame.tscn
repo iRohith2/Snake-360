@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Camera.gd" type="Script" id=1]
 [ext_resource path="res://Player.tscn" type="PackedScene" id=2]
@@ -7,28 +7,13 @@
 [ext_resource path="res://UI_play.tscn" type="PackedScene" id=5]
 [ext_resource path="res://World.gd" type="Script" id=6]
 [ext_resource path="res://World0.tscn" type="PackedScene" id=7]
-
-[sub_resource type="SphereShape" id=6]
-radius = 0.22
-
-[sub_resource type="SpatialMaterial" id=7]
-albedo_color = Color( 0.901961, 0.313726, 0.0784314, 1 )
+[ext_resource path="res://UI.gd" type="Script" id=8]
 
 [node name="MainGame" type="Node"]
 pause_mode = 2
 
 [node name="Spawner" type="Node" parent="."]
 script = ExtResource( 3 )
-
-[node name="Food" type="StaticBody" parent="Spawner"]
-visible = false
-
-[node name="CollisionShape" type="CollisionShape" parent="Spawner/Food"]
-shape = SubResource( 6 )
-
-[node name="CSGSphere" type="CSGSphere" parent="Spawner/Food"]
-radius = 0.22
-material = SubResource( 7 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 
@@ -40,6 +25,7 @@ z_offset = 6.0
 [node name="Player" parent="." instance=ExtResource( 2 )]
 
 [node name="Control" parent="." instance=ExtResource( 4 )]
+script = ExtResource( 8 )
 
 [node name="UI_play" parent="." instance=ExtResource( 5 )]
 visible = false

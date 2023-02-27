@@ -21,9 +21,9 @@ align = 1
 
 [node name="ButtonRight" type="Button" parent="."]
 modulate = Color( 1, 1, 1, 0.196078 )
-margin_left = 900.0
+margin_left = 239.0
 margin_top = 377.0
-margin_right = 980.0
+margin_right = 319.0
 margin_bottom = 537.0
 icon = ExtResource( 2 )
 flat = true
@@ -31,9 +31,9 @@ expand_icon = true
 
 [node name="ButtonLeft" type="Button" parent="."]
 modulate = Color( 1, 1, 1, 0.196078 )
-margin_left = 845.0
+margin_left = 184.0
 margin_top = 377.0
-margin_right = 925.0
+margin_right = 264.0
 margin_bottom = 537.0
 rect_scale = Vector2( -1, 1 )
 icon = ExtResource( 2 )
@@ -42,9 +42,9 @@ expand_icon = true
 
 [node name="ButtonUp" type="Button" parent="."]
 modulate = Color( 1, 1, 1, 0.196078 )
-margin_left = 240.0
+margin_left = 953.0
 margin_top = 427.0
-margin_right = 320.0
+margin_right = 1033.0
 margin_bottom = 587.0
 rect_rotation = 89.9999
 rect_scale = Vector2( -1, 1 )
@@ -54,10 +54,10 @@ expand_icon = true
 
 [node name="ButtonDown" type="Button" parent="."]
 modulate = Color( 1, 1, 1, 0.196078 )
-margin_left = 240.0
-margin_top = 477.0
-margin_right = 320.0
-margin_bottom = 637.0
+margin_left = 953.0
+margin_top = 484.0
+margin_right = 1033.0
+margin_bottom = 644.0
 rect_rotation = 89.9999
 icon = ExtResource( 2 )
 flat = true

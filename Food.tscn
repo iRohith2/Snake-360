@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="SphereShape" id=6]
+radius = 0.22
+
+[sub_resource type="SpatialMaterial" id=7]
+albedo_color = Color( 0.901961, 0.313726, 0.0784314, 1 )
+
+[node name="Food" type="StaticBody"]
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 6 )
+
+[node name="CSGSphere" type="CSGSphere" parent="."]
+radius = 0.22
+material = SubResource( 7 )

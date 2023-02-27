@@ -6,6 +6,9 @@ var swipe_start = null
 var minimum_drag = 20
 var pressed := false
 
+func _ready():
+	pause_mode = PAUSE_MODE_PROCESS
+
 func _input(event):
 	
 	if event is InputEventMouseButton and event.button_index == BUTTON_LEFT:
@@ -17,6 +20,7 @@ func _input(event):
 			_calculate_swipe(get_viewport().get_mouse_position())
 		
 	if event.is_action_pressed("ui_up"):
+		print("up")
 		emit_signal("swipe", "up")
 	elif event.is_action_pressed("ui_down"):
 		emit_signal("swipe", "down")

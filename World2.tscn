@@ -3,7 +3,7 @@
 [sub_resource type="SpatialMaterial" id=1]
 flags_transparent = true
 params_cull_mode = 2
-albedo_color = Color( 0.235294, 0.235294, 0.235294, 0.392157 )
+albedo_color = Color( 1, 1, 1, 0.196078 )
 
 [sub_resource type="BoxShape" id=2]
 extents = Vector3( 2, 0.25, 0.25 )
@@ -124,24 +124,24 @@ width = 4.0
 height = 0.5
 depth = 0.5
 
-[node name="Block010" type="StaticBody" parent="."]
+[node name="Block10" type="StaticBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.25, -5, -5 )
 
-[node name="CollisionShape" type="CollisionShape" parent="Block010"]
+[node name="CollisionShape" type="CollisionShape" parent="Block10"]
 shape = SubResource( 2 )
 
-[node name="CSGBox" type="CSGBox" parent="Block010"]
+[node name="CSGBox" type="CSGBox" parent="Block10"]
 width = 4.0
 height = 0.5
 depth = 0.5
 
-[node name="Block011" type="StaticBody" parent="."]
+[node name="Block11" type="StaticBody" parent="."]
 transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -5, -5, -3.25 )
 
-[node name="CollisionShape" type="CollisionShape" parent="Block011"]
+[node name="CollisionShape" type="CollisionShape" parent="Block11"]
 shape = SubResource( 2 )
 
-[node name="CSGBox" type="CSGBox" parent="Block011"]
+[node name="CSGBox" type="CSGBox" parent="Block11"]
 width = 4.0
 height = 0.5
 depth = 0.5

@@ -6,11 +6,11 @@ onready var worlds := [
 	preload("res://World2.tscn")
 ]
 
-func worlds_count() -> int:
-	return worlds.size()
+var curr_world_idx := 0
 	
 func switch_world(idx: int):
 	remove_child(get_node("Box"))
 	while idx < 0: idx += worlds.size()
-	add_child(worlds[idx % worlds.size()].instance())
+	curr_world_idx = idx % worlds.size()
+	add_child(worlds[curr_world_idx].instance())
 	
