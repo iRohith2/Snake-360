@@ -7,8 +7,10 @@ export var max_alpha := 1.0
 onready var player := get_node("/root/MainGame/Player")
 onready var spawner := get_node("/root/MainGame/Spawner")
 onready var ui_play := get_node("/root/MainGame/UI_play")
+onready var world := get_node("/root/MainGame/World")
 
 var first_run := true
+var world_idx = 0
 
 func _ready():
 	get_node("/root/Swipe").connect("swipe", self, "my_input")
@@ -42,3 +44,10 @@ func save_hs():
 	file.store_32(int($ScoreBoard/HighScore.text))
 	file.close()
 
+func _on_ButtonRight_pressed():
+	world_idx += 1
+	world.switch_world(world_idx)
+
+func _on_ButtonLeft_pressed():
+	world_idx -= 1
+	world.switch_world(world_idx)

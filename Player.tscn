@@ -1,0 +1,76 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Player.gd" type="Script" id=1]
+
+[sub_resource type="SpatialMaterial" id=21]
+albedo_color = Color( 1, 0, 0, 1 )
+
+[sub_resource type="QuadMesh" id=22]
+material = SubResource( 21 )
+size = Vector2( 0.5, 0.5 )
+
+[sub_resource type="Curve" id=18]
+_data = [ Vector2( 0, 1 ), 0.0, 0.0, 0, 0, Vector2( 1, 0 ), 0.0, 0.0, 0, 0 ]
+
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 0.2, 0.02, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.490196, 0.313726, 1, 1 )
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 0.117647, 0.117647, 0.117647, 1 )
+
+[sub_resource type="SphereShape" id=5]
+radius = 0.26
+
+[node name="Player" type="Spatial"]
+pause_mode = 1
+script = ExtResource( 1 )
+speed = 3.0
+
+[node name="Head" type="KinematicBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5 )
+
+[node name="Particles" type="CPUParticles" parent="Head"]
+pause_mode = 2
+emitting = false
+amount = 20
+one_shot = true
+explosiveness = 1.0
+lifetime_randomness = 0.5
+mesh = SubResource( 22 )
+emission_shape = 1
+emission_sphere_radius = 0.3
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 2.0
+scale_amount_curve = SubResource( 18 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.27, 0 )
+shape = SubResource( 2 )
+
+[node name="CSGSphere" type="CSGSphere" parent="Head"]
+radius = 0.3
+material = SubResource( 3 )
+
+[node name="Eye0" type="CSGSphere" parent="Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.12, 0.1, 0.25 )
+radius = 0.055
+material = SubResource( 4 )
+
+[node name="Eye1" type="CSGSphere" parent="Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.12, 0.1, 0.25 )
+radius = 0.055
+material = SubResource( 4 )
+
+[node name="Body" type="KinematicBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 5 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Body"]
+shape = SubResource( 5 )
+
+[node name="CSGSphere" type="CSGSphere" parent="Body"]
+radius = 0.26
+material = SubResource( 3 )

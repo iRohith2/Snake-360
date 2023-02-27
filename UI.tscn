@@ -1,51 +1,106 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://fonts/Terasong-mLZ3a.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://UI.gd" type="Script" id=1]
+[ext_resource path="res://fonts/Snake Chan.otf" type="DynamicFontData" id=2]
+[ext_resource path="res://fonts/Gidolinya-Regular.otf" type="DynamicFontData" id=3]
+[ext_resource path="res://arraow.svg" type="Texture" id=4]
 
-[sub_resource type="GDScript" id=10]
-script/source = "extends VBoxContainer
-
-func _input(event: InputEvent) -> void:
-	print(\"input\")
-	if event is InputEventMouseButton and event.pressed and event.button_index == BUTTON_RIGHT:
-		print(\"clicked!\")
-		#var bounds = Rect2(rect_position, rect_size)
-		#if bounds.has_point(event.position):
-"
+[sub_resource type="DynamicFont" id=8]
+size = 120
+font_data = ExtResource( 2 )
 
 [sub_resource type="DynamicFont" id=9]
-size = 80
-font_data = ExtResource( 1 )
+size = 36
+font_data = ExtResource( 3 )
+
+[sub_resource type="DynamicFont" id=11]
+size = 50
+font_data = ExtResource( 3 )
 
 [node name="Control" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = -24.0
-margin_bottom = 400.0
+script = ExtResource( 1 )
 
-[node name="UI" type="VBoxContainer" parent="."]
+[node name="Label" type="Label" parent="."]
+anchor_right = 1.0
+margin_top = 16.0
+margin_bottom = 136.0
+custom_fonts/font = SubResource( 8 )
+text = "Snake 3D"
+align = 1
+
+[node name="TapToPlay" type="Label" parent="."]
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 400.0
-margin_top = 400.0
-script = SubResource( 10 )
-
-[node name="StartGame" type="Label" parent="UI"]
-margin_right = 600.0
-margin_bottom = 140.0
+margin_top = -80.0
 custom_fonts/font = SubResource( 9 )
-text = "Start"
+text = "Swipe to play"
+align = 1
 
-[node name="Options" type="Label" parent="UI"]
-margin_top = 144.0
-margin_right = 600.0
-margin_bottom = 284.0
-custom_fonts/font = SubResource( 9 )
-text = "Options"
+[node name="ScoreBoard" type="Control" parent="."]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
 
-[node name="Exit" type="Label" parent="UI"]
-margin_top = 288.0
-margin_right = 600.0
-margin_bottom = 428.0
-custom_fonts/font = SubResource( 9 )
-text = "Exit"
+[node name="ScoreLabel" type="Label" parent="ScoreBoard"]
+margin_left = 366.0
+margin_top = 258.0
+margin_right = 526.0
+margin_bottom = 313.0
+rect_pivot_offset = Vector2( 80, 28 )
+custom_fonts/font = SubResource( 11 )
+text = "Score :  "
+align = 1
+
+[node name="Score" type="Label" parent="ScoreBoard"]
+margin_left = 535.0
+margin_top = 263.0
+margin_right = 695.0
+margin_bottom = 318.0
+rect_pivot_offset = Vector2( 80, 28 )
+custom_fonts/font = SubResource( 11 )
+text = "0"
+align = 1
+
+[node name="HighScoreLabel" type="Label" parent="ScoreBoard"]
+margin_left = 265.0
+margin_top = 347.0
+margin_right = 526.0
+margin_bottom = 402.0
+custom_fonts/font = SubResource( 11 )
+text = "High Score :  "
+align = 1
+
+[node name="HighScore" type="Label" parent="ScoreBoard"]
+margin_left = 535.0
+margin_top = 350.0
+margin_right = 695.0
+margin_bottom = 405.0
+rect_pivot_offset = Vector2( 80, 28 )
+custom_fonts/font = SubResource( 11 )
+text = "0"
+align = 1
+
+[node name="ButtonRight" type="Button" parent="."]
+margin_left = 924.0
+margin_top = 263.0
+margin_right = 974.0
+margin_bottom = 363.0
+icon = ExtResource( 4 )
+flat = true
+expand_icon = true
+
+[node name="ButtonLeft" type="Button" parent="."]
+margin_left = 100.0
+margin_top = 263.0
+margin_right = 150.0
+margin_bottom = 363.0
+rect_scale = Vector2( -1, 1 )
+icon = ExtResource( 4 )
+flat = true
+expand_icon = true
+
+[connection signal="pressed" from="ButtonRight" to="." method="_on_ButtonRight_pressed"]
+[connection signal="pressed" from="ButtonLeft" to="." method="_on_ButtonLeft_pressed"]

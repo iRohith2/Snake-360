@@ -156,7 +156,7 @@ func _physics_process(delta):
 				ui.save_hs()
 			node.queue_free()
 			grow()
-		elif node.name.begins_with("Body") and Time.get_ticks_msec() > 1000:
+		elif node.name.begins_with("Block") or (node.name.begins_with("Body") and Time.get_ticks_msec() > 1000):
 			$Head/Particles.emitting = true
 			get_tree().paused = true
 			ui.visible = true
