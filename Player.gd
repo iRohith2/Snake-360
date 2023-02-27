@@ -5,7 +5,7 @@ export var max_speed := 10.0
 export var steer_speed := 180.0
 export var max_steer_speed := 360.0
 export var extents := 5.0
-export var min_gap := 0.2
+export var min_gap := 0.3
 export var smooth_turns := false
 
 onready var root 			:= get_node("/root/MainGame")
@@ -74,26 +74,34 @@ func _process(delta):
 	var prev_part := head
 	
 	for part in body_parts:
-		var dst := 0.0
+		var rem_dst := 0.1
 		
-		while i < position_history.size() and dst < min_gap:
-			dst += position_history[i].distance_to(position_history[i-1])
-			i += 1
+		while i < position_history.size() and rem_dst > 0:
+			rem_dst = min_gap - position_history[i].distance_to(prev_part.global_translation)
+			if rem_dst > 0:
+				i += 1
 		
 		pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
-		var rem_dst := min_gap - pos.distance_to(prev_part.global_translation)
 		
-		while rem_dst < 0 and i > 1:
-			i -= 1
-			pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
-			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
+		var t : float = min_gap - position_history[i-1].distance_to(prev_part.global_translation)
+		
+		if i < position_history.size() and (t - rem_dst) != 0:
+			t = -rem_dst / (t - rem_dst)
+			pos = pos.linear_interpolate(position_history[i-1], t)
 			
-		if (abs(rem_dst) > 0.0001) and i+1 < position_history.size():
-			var t : float = min_gap - position_history[i+1].distance_to(prev_part.global_translation)
-			t = -t / (rem_dst - t)
-			pos = pos.linear_interpolate(position_history[i+1], 1-t)
-			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
-			print(rem_dst, " ", t)
+		rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
+		
+#		while rem_dst < 0 and i > 1:
+#			i -= 1
+#			pos = position_history[i] if i < position_history.size() else position_history[position_history.size()-1]
+#			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
+#
+#		if (abs(rem_dst) > 0.0001) and i+1 < position_history.size():
+#			var t : float = min_gap - position_history[i+1].distance_to(prev_part.global_translation)
+#			t = -t / (rem_dst - t)
+#			pos = pos.linear_interpolate(position_history[i+1], 1-t)
+#			rem_dst = min_gap - pos.distance_to(prev_part.global_translation)
+#			print(rem_dst, " ", t)
 		
 		part.global_translation = pos
 		prev_part = part
